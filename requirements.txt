@@ -2,4 +2,5 @@ imutils
 opencv-python
 nlopt
 wheel
+setuptools
 urdfpy

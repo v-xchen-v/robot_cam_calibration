@@ -1,6 +1,11 @@
+import os, sys
+sibling_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(sibling_path)
+
 from robot_cam_calibration.robot_handeye_opt_calibrator import HandEyeOptCalibrator
 import numpy as np
 from robot_cam_calibration.camera_intrinsic_params_calibrator import CameraIntrinsicParamsCalibrator
+
 
 # # The configurations for camera calibration
 # INTRINSIC_CALIB_DATA_DIR = "./data/demo_data/robot_cam_calibration_data_0906/handeye"
@@ -17,9 +22,9 @@ from robot_cam_calibration.camera_intrinsic_params_calibrator import CameraIntri
 # import argparse
 # TODO: use argparser here, to specfic input and output dir as cli parameters
 
-HANDEYE_CALIB_DATA_DIR= "input" # /home/xichen/Documents/repos/Luca_Setup/data/output/calib_data/1011_d455_no2_intrinsic
-HANDEYE_CALIB_RESULT_OUTPUT_DIR = "output" #'/home/xichen/Documents/repos/Luca_Setup/output/calib_data/0116_right_output/handeye_opt'
-
+HANDEYE_CALIB_DATA_DIR= "data/sample_data" # replace to your collected data
+HANDEYE_CALIB_RESULT_OUTPUT_DIR = "output" # output
+os.makedirs(HANDEYE_CALIB_RESULT_OUTPUT_DIR, exist_ok=True)
 
 calibrator = HandEyeOptCalibrator(XX=11, YY=8, L=0.02)
 
@@ -28,7 +33,7 @@ excluded_image_idxs = []
 extrinsic_calib_image_idxs = np.delete(extrinsic_calib_image_idxs, excluded_image_idxs)
 
 
-calibrator.load_camera_intrinsics('data/output/calib_data/1011_d455_no2_intrinsic/intrinsic')
+calibrator.load_camera_intrinsics('data/1011_d455_no2_intrinsic/intrinsic')
 calibrator.load_calibration_images(HANDEYE_CALIB_DATA_DIR,
                                    extrinsic_calib_image_idxs)
 calibrator.load_calibration_ee_xyzrpy(HANDEYE_CALIB_DATA_DIR, extrinsic_calib_image_idxs)
@@ -50,8 +55,11 @@ print(f'argmin_error_idx: {argmin_error_idx}')
 calibrator.set_initial_imageid(argmin_error_idx)
 calibrator.optmize()
 errors = calibrator.opt_handeye_calib_reproject_error(vis=True)
-calibrator.save()
+calibrator.save(save_dir=HANDEYE_CALIB_RESULT_OUTPUT_DIR)
 
-# calibrator.handeye_calib_reproject_error(vis=True)
+mean_err = np.array(errors).mean()
 print(np.array(errors).mean())
-# calibrator.print_result()
+# save reproject error to file
+with open(os.path.join(HANDEYE_CALIB_RESULT_OUTPUT_DIR, "reprojection_error.txt"), "w") as f:
+    f.write(str(mean_err))
+    f.close()
