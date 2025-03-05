@@ -1,0 +1,3 @@
+[submodule "catkin_ws/src/rm_robot"]
+	path = catkin_ws/src/rm_robot
+	url = https://github.com/RealManRobot/rm_robot
