@@ -1,3 +1,5 @@
 imutils
 opencv-python
 nlopt
+wheel
+urdfpy
